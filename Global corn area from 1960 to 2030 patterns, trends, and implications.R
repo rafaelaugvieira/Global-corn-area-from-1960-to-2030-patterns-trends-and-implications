@@ -1,13 +1,13 @@
 #Loading packages and dataset
 library (forecast); library(readxl); library(writexl); library(dplyr)
-setwd('C:/Users/RAV_I/OneDrive/Área de Trabalho') 
-d1 <- read_excel("Dataset.xlsx", sheet="Dataset")
+setwd('C:/Users/RAV_I/OneDrive/Área de Trabalho/Paper, The Journal of Agricultural Science') 
+d1 <- read_excel("Global corn harvested area, 28052024.xlsx", sheet="Dataset")
 
 #Set the column of the dataset to be used in the analysis
-d2 <- as.ts (d1$China)
+d2 <- as.ts (d1$World)
 
-#Set the number of ts to the projection from the ARIMA models
-ts <- 7
+#Set the number of years (ts) to the projection from the ARIMA models; 6 in the case of this paper.
+ts <- 6
 
 #Run the 1,000 distinct ARIMA models
 try({pj1<- 0; mod <- Arima (d2, order=c(0,0,0)); sd <- sqrt (mod$sigma2); aic <- mod$aic; aic <- as.data.frame (aic); pj <- forecast (mod, h=ts); pj <- as.data.frame (pj$mean); pj<- t(pj); pj1 <- cbind(pj, aic, sd);pj1})
@@ -1012,7 +1012,7 @@ try({pj999<- 0; mod <- Arima (d2, order=c(9,9,8)); sd <- sqrt (mod$sigma2); aic 
 try({pj1000<- 0; mod <- Arima (d2, order=c(9,9,9)); sd <- sqrt (mod$sigma2); aic <- mod$aic; aic <- as.data.frame (aic); pj <- forecast (mod, h=ts); pj <- as.data.frame (pj$mean); pj<- t(pj); pj1000 <- cbind(pj, aic, sd);pj1000})
 
 #Merge the 1,000 distinct ARIMA models into one out file
-arimaname <- read_excel("Dataset.xlsx", sheet="ARIMA")
+arimaname <- read_excel("Global corn harvested area, 28052024.xlsx", sheet="ARIMA")
 allarima <- rbind(get0("pj1"), 
                   get0("pj2"), 
                   get0("pj3"),       
@@ -2035,18 +2035,18 @@ t <- d6[21:31, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y ~ x, d = t
 t <- d6[31:41, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t4 <- linearcoef/av_t*100
 t <- d6[41:51, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t5 <- linearcoef/av_t*100
 t <- d6[51:61, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t6 <- linearcoef/av_t*100
-t <- d6[61:64, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t7 <- linearcoef/av_t*100
-t <- d6[65:71, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t8_scenario1 <- linearcoef/av_t*100;
-t <- d6[65:71, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y2 ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t8_scenario2 <- linearcoef/av_t*100
-t <- d6[65:71, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y3 ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t8_scenario3 <- linearcoef/av_t*100
+t <- d6[61:65, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t7 <- linearcoef/av_t*100
+t <- d6[66:71, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t8_scenario1 <- linearcoef/av_t*100;
+t <- d6[66:71, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y2 ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t8_scenario2 <- linearcoef/av_t*100
+t <- d6[66:71, ]; t <- as.data.frame(t); av_t <- mean(t$y); t <- lm(y3 ~ x, d = t); t <- as.data.frame(t$coefficients); linearcoef <- t[2:2,]; rate_perc_t8_scenario3 <- linearcoef/av_t*100
 
 rates <- rbind (rate_perc_t1, rate_perc_t2, rate_perc_t3, rate_perc_t4, rate_perc_t5,
-                rate_perc_t6, rate_perc_t7, rate_perc_t8_scenario1, rate_perc_t8_scenario2, rate_perc_t8_scenario3)
+               rate_perc_t6, rate_perc_t7, rate_perc_t8_scenario1, rate_perc_t8_scenario2, rate_perc_t8_scenario3)
 
 rates <- as.data.frame(rates); rates$t <- row.names(rates); colnames(rates) <- c('rate', 't'); rates <- rates %>% relocate(t, .before=rate); rates <- t(rates); rates <- as.data.frame(rates)
 
 #Print and export outs
-out1000arima; write_xlsx(out1000arima, "1_China, 1000 ARIMAs.xlsx")
-out100arima; write_xlsx(out100arima, "1_China, best 100 ARIMAs with k-mean group.xlsx")
-scenarios; write_xlsx(scenarios, "1_China, scenarios.xlsx")
-rates; write_xlsx(rates, "1_China, rates.xlsx")
+#out1000arima; write_xlsx(out1000arima, "World, 1000 ARIMAs.xlsx")
+#out100arima; write_xlsx(out100arima, "World, best 100 ARIMAs with k-mean group.xlsx")
+scenarios; write_xlsx(scenarios, "World, scenarios.xlsx")
+rates; write_xlsx(rates, "World, rates.xlsx")
